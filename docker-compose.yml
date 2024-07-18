@@ -1,0 +1,172 @@
+# Local Kafka development environment setup
+# ref: https://github.com/simplesteph/kafka-stack-docker-compose/blob/master/full-stack.yml
+version: '3'
+
+services:
+  loggerservice:
+    build: 
+      context: loggerservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8010:8000" 
+
+  promocodeservice:
+    build: 
+      context: promocodeservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8009:8000" 
+
+  authservice:
+    build: 
+      context: authservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - 8008:8000
+
+  multiplicationservice:
+    build: 
+      context: multiplicationservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8007:8000" 
+
+  paymentservice:
+    build: 
+      context: paymentservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8006:8000" 
+
+  withdrawservice:
+    build: 
+      context: withdrawservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8005:8000" 
+
+  historyservice:
+    build: 
+      context: historyservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8004:8000"
+
+  subscribeservice:
+    build: 
+      context: subscribeservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8003:8000"
+
+  userservice:
+    build: 
+      context: userservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+      
+    depends_on:
+      - postgres
+      - kafka1
+    ports:
+      - "8002:8000"
+
+  mailsenderservice:
+    build: 
+      context: mailsenderservice
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka1
+      - postgres
+    ports:
+      - "8001:8000"
+
+  postgres:
+    image: postgres:latest
+    restart: on-failure
+    hostname: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2006
+      POSTGRES_DB: retro
+    volumes:
+      - ./full-stack/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  zoo1:
+    image: confluentinc/cp-zookeeper:7.3.2
+    restart: on-failure
+    hostname: zoo1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+    volumes:
+      - ./full-stack/zoo1/data:/data
+      - ./full-stack/zoo1/datalog:/datalog
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: kafka1
+    restart: on-failure
+    ports:
+      - '9092:9092'
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zoo1:2181'
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:9092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    volumes:
+      - ./full-stack/kafka1/data:/var/lib/kafka/data
+    depends_on:
+      - zoo1
+
+    

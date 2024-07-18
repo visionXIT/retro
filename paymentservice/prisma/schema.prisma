@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model auth_table {
+  id         Int          @id @default(autoincrement())
+  email      String
+  password   String
+  jwt_token  String?
+  login      String?
+  user_table user_table[]
+}
+
+model blog_table {
+  id                 Int       @id @default(autoincrement())
+  title_block        String?
+  description_block  String?
+  create_date        DateTime? @db.Timestamp(6)
+  update_date        DateTime? @db.Timestamp(6)
+  id_user            Int
+  visual_content     String[]
+  is_private_content Int       @default(0) @db.SmallInt
+  is_delete          Int       @default(0) @db.SmallInt
+  reading_time       Int?
+}
+
+model history_table {
+  id                   Int              @id @default(autoincrement())
+  is_delete            Int?             @default(0) @db.SmallInt
+  id_user              Int?
+  id_subscribe         Int?
+  id_process           String?          @unique(map: "history_table_pk") @db.VarChar(50)
+  name_process         String?
+  wallet_count         Int?
+  logs                 Json[]           @db.Json
+  options              Json?            @db.Json
+  tokens               String[]
+  from                 String[]
+  to                   String[]
+  amount               String?
+  problem_wallet_count Int?
+  subscribe_table      subscribe_table? @relation(fields: [id_subscribe], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_table           user_table?      @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model multiplicator_table {
+  id                   Int        @id @default(autoincrement())
+  id_user              Int
+  status_process       String
+  ecosystem            String
+  is_delete            Int        @default(0) @db.SmallInt
+  id_process           String     @unique(map: "multiplicator_table_pk")
+  wallet_count         Int?
+  problem_wallet_count Int?
+  logs                 Json[]     @db.Json
+  artifact             String[]
+  options              Json?      @db.Json
+  create_at            DateTime?  @default(now()) @db.Timestamp(6)
+  is_emergency_stop    Int?       @default(0) @db.SmallInt
+  user_table           user_table @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model payments_table {
+  id             Int        @id(map: "payments_pk") @default(autoincrement())
+  user_id        Int
+  payment_data   Json       @db.Json
+  payment_status String     @default("waiting")
+  payment_id     String?
+  timestamp      String
+  user_table     user_table @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payments_user_table_id_fk")
+}
+
+model refferal_table {
+  id                                                Int          @id @default(autoincrement())
+  id_user                                           Int?
+  refferal_code                                     String?
+  user_table_refferal_table_id_userTouser_table     user_table?  @relation("refferal_table_id_userTouser_table", fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "id_user")
+  user_table_user_table_id_refferalTorefferal_table user_table[] @relation("user_table_id_refferalTorefferal_table")
+}
+
+model role_table {
+  id         Int          @id @default(autoincrement())
+  name       String
+  is_delete  Int          @default(0) @db.SmallInt
+  user_table user_table[]
+}
+
+model state_subscribe_table {
+  id              Int              @id @default(autoincrement())
+  actions         Int              @default(0)
+  wallet          String?
+  is_delete       Int              @default(0) @db.SmallInt
+  id_user         Int?
+  id_subscribe    Int?
+  subscribe_table subscribe_table? @relation(fields: [id_subscribe], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_table      user_table?      @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model subscribe_table {
+  id                    Int                     @id @default(autoincrement())
+  coast_one_action      Float?
+  name                  String?
+  is_delete             Int?                    @default(0) @db.SmallInt
+  history_table         history_table[]
+  state_subscribe_table state_subscribe_table[]
+  user_subscribe_table  user_subscribe_table[]
+}
+
+model user_subscribe_table {
+  actions_limit   Int?
+  actions_used    Int?
+  is_delete       Int             @default(0) @db.SmallInt
+  id_user         Int
+  id_subscribe    Int
+  id              Int             @id @default(autoincrement())
+  subscribe_table subscribe_table @relation(fields: [id_subscribe], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_table      user_table      @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_table {
+  id                                                    Int                     @id @default(autoincrement())
+  address                                               String?
+  id_role                                               Int?
+  id_refferal                                           Int?
+  is_delete                                             Int                     @default(0) @db.SmallInt
+  refferal_owner_code                                   String?
+  id_auth                                               Int?
+  history_table                                         history_table[]
+  multiplicator_table                                   multiplicator_table[]
+  payments_table                                        payments_table[]
+  refferal_table_refferal_table_id_userTouser_table     refferal_table[]        @relation("refferal_table_id_userTouser_table")
+  state_subscribe_table                                 state_subscribe_table[]
+  user_subscribe_table                                  user_subscribe_table[]
+  auth_table                                            auth_table?             @relation(fields: [id_auth], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "id_auth")
+  refferal_table_user_table_id_refferalTorefferal_table refferal_table?         @relation("user_table_id_refferalTorefferal_table", fields: [id_refferal], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "id_refferal")
+  role_table                                            role_table?             @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "id_role")
+}
+
+model withdraw_table {
+  is_delete            Int?      @default(0) @db.SmallInt
+  options              String?
+  problem_wallets      String?
+  status               String?
+  id_process           String    @unique(map: "withdraw_table_pk") @db.VarChar(51)
+  id_user              Int?
+  id                   Int       @id @default(autoincrement())
+  wallet_count         Int?
+  problem_wallet_count Int?
+  logs                 String?
+  create_at            DateTime? @default(now()) @db.Timestamp(6)
+  broken_logs          String?
+}
+
+model promocode_table {
+  id        Int       @id @default(autoincrement())
+  config    Json?     @db.Json
+  is_delete Int?      @default(0) @db.SmallInt
+  create_at DateTime? @default(now()) @db.Timestamp(6)
+  promocode String    @unique @db.VarChar(20)
+  used_by   Int[]
+}

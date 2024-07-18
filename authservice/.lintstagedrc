@@ -1,0 +1,6 @@
+{
+  "src/**/*.ts": ["npm run lint:ts"],
+  "lint-staged": {
+    "*.{ts,js}": ["eslint --fix", "prettier --write", "git add"]
+  }
+}

@@ -1,0 +1,1 @@
+export const zksyncBridgeETHAddress = "0x57891966931eb4bb6fb81430e6ce0a03aabde063";

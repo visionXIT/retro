@@ -1,0 +1,6 @@
+**/node_modules
+*/.env
+**/full-stack
+.DS_Store
+build/
+.idea

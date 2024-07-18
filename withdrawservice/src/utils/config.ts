@@ -1,0 +1,2 @@
+export const COIN_SYMBOLS = "ETH,USDT,USDC,DAI,WBTC"
+export const ZKSYNC_SUBSCRIBE_ID = 9

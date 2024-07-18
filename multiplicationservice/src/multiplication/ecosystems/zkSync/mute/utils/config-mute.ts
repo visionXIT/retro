@@ -1,0 +1,3 @@
+export const MUTE_ROUTER_ADDRESS = "0x8B791913eB07C32779a16750e3868aA8495F5964";
+export const SLIPPAGE_MAX = 90; // %
+export const DEFAULT_NETWORK_NAME = 'zksync';
